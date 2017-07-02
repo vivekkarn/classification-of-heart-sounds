@@ -30,7 +30,7 @@ for bfile in normal:
     y2,sr2 = librosa.load(os.path.join("normal",bfile))
     normal_sounds.append(y2)
 
-#Waah
+#Setting up Tensorflow hyperparameters
 
 n_classes = 3
 x = tf.placeholder(tf.float32,[None,None])
