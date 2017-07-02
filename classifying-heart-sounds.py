@@ -1,4 +1,4 @@
-#Importing all the required documents
+#Importing all the required 
 
 import os
 import librosa
@@ -7,16 +7,11 @@ import numpy as np
 import glob
 import matplotlib.pyplot as plt
 %matplotlib inline
-import pandas as pd
 
-#Setting up
-
+#Initialiazing arrays
 murmurs = os.listdir("murmur")
 extrasystole = os.listdir("extrasystole")
 normal = os.listdir("normal")
-
-#Initialiazing arrays
-
 murmur_sounds = []
 extrasystole_sounds = []
 normal_sounds = []
@@ -31,7 +26,6 @@ for bfile in normal:
     normal_sounds.append(y2)
 
 #Setting up Tensorflow hyperparameters
-
 n_classes = 3
 x = tf.placeholder(tf.float32,[None,None])
 Y = tf.placeholder(tf.float32,[None,3])
