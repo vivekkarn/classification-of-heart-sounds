@@ -1,35 +1,36 @@
-#Importing all the required libraries
-
 import os
 import librosa
 import tensorflow as tf
 import numpy as np
-import glob
-import matplotlib.pyplot as plt
-%matplotlib inline
 
-#Initialiazing arrays
-murmurs = os.listdir("murmur")
-extrasystole = os.listdir("extrasystole")
-normal = os.listdir("normal")
-murmur_sounds = []
-extrasystole_sounds = []
-normal_sounds = []
-for file in murmurs:
-    y,sr = librosa.load(os.path.join("murmur",file))
-    murmur_sounds.append(y)
-for afile in extrasystole:
-    y1,sr1 = librosa.load(os.path.join("extrasystole",afile))
-    extrasystole_sounds.append(y1)
-for bfile in normal:
-    y2,sr2 = librosa.load(os.path.join("normal",bfile))
-    normal_sounds.append(y2)
 
-#Setting up Tensorflow hyperparameters
-n_classes = 3
-x = tf.placeholder(tf.float32,[None,None])
-Y = tf.placeholder(tf.float32,[None,3])
-W = tf.Variable(tf.zeros())
-b = tf.Variable(tf.zeros(3))
-sess = tf.Session()
-pred = tf.nn.softmax(tf.matmul(x, W) + b)
+normal_onehot = [1,0,0]
+murmur_onehot = [0,1,0]
+extrasystole_onehot = [0,0,1]
+
+def decodeFolder(category):
+	print("Starting decoding folder...")
+	listOfFiles = os.listdir(category)
+	arrays_sound = np.empty((0,193))
+	for file in listOfFiles:
+		filename = os.path.join(category,file)
+		features_sound = extract_feature(filename)
+		arrays_sound = np.vstack((arrays_sound,features_sound))
+	return arrays_sound
+
+def extract_feature(file_name):
+	print("Extracting...")
+	X, sample_rate = librosa.load(file_name)
+	stft = np.abs(librosa.stft(X))
+	mfccs = np.mean(librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40).T,axis=0)
+	chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T,axis=0)
+	mel = np.mean(librosa.feature.melspectrogram(X, sr=sample_rate).T,axis=0)
+	contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T,axis=0)
+	tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X),sr=sample_rate).T,axis=0)
+	return np.hstack((mfccs,chroma,mel,contrast,tonnetz))
+
+
+murmur_sounds = decodeFolder("murmur")
+print(len(murmur_sounds))
+#extrasystole_sounds = decodeFolder("extrasystole")
+#normal_sounds = decodeFolder("normal")
