@@ -8,6 +8,8 @@ normal_onehot = [1,0,0]
 murmur_onehot = [0,1,0]
 extrasystole_onehot = [0,0,1]
 
+
+#Handling files and making up arrays of properties of sound files
 def decodeFolder(category):
 	print("Starting decoding folder...")
 	listOfFiles = os.listdir(category)
@@ -18,6 +20,7 @@ def decodeFolder(category):
 		arrays_sound = np.vstack((arrays_sound,features_sound))
 	return arrays_sound
 
+#extracting properties of audio files and returning as a stack of array of len 193 
 def extract_feature(file_name):
 	print("Extracting...")
 	X, sample_rate = librosa.load(file_name)
@@ -32,5 +35,5 @@ def extract_feature(file_name):
 
 murmur_sounds = decodeFolder("murmur")
 print(len(murmur_sounds))
-#extrasystole_sounds = decodeFolder("extrasystole")
-#normal_sounds = decodeFolder("normal")
+extrasystole_sounds = decodeFolder("extrasystole")
+normal_sounds = decodeFolder("normal")
