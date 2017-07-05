@@ -8,8 +8,6 @@ normal_onehot = [1,0,0]
 murmur_onehot = [0,1,0]
 extrasystole_onehot = [0,0,1]
 
-
-#Handling files and making up arrays of properties of sound files
 def decodeFolder(category):
 	print("Starting decoding folder...")
 	listOfFiles = os.listdir(category)
@@ -20,7 +18,6 @@ def decodeFolder(category):
 		arrays_sound = np.vstack((arrays_sound,features_sound))
 	return arrays_sound
 
-#extracting properties of audio files and returning as a stack of array of len 193 
 def extract_feature(file_name):
 	print("Extracting...")
 	X, sample_rate = librosa.load(file_name)
@@ -33,7 +30,27 @@ def extract_feature(file_name):
 	return np.hstack((mfccs,chroma,mel,contrast,tonnetz))
 
 
-murmur_sounds = decodeFolder("murmur")
-print(len(murmur_sounds))
-extrasystole_sounds = decodeFolder("extrasystole")
 normal_sounds = decodeFolder("normal")
+labels = [normal_onehot for items in normal_sounds]
+
+
+					#####################TENSORFLOW#############################
+
+#setting up hyperparameters
+x = tf.placeholder(tf.float32,[None,193])
+y_ = tf.placeholder(tf.float32,[None,3])
+W = tf.Variable(tf.zeros([193,3]))
+b = tf.Variable(tf.zeros([3]))
+init = tf.global_variables_initializer()
+
+#starting training process
+y = tf.nn.softmax(tf.matmul(x, W) + b)
+cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+train_step = tf.train.GradientDescentOptimizer(0.001).minimize(cross_entropy)
+
+
+with tf.Session() as sess:
+	sess.run(init)
+	for epoch in range(200):
+		sess.run(y,feed_dict={x:normal_sounds, y_:labels})
+	print("Training Done!")
