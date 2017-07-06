@@ -9,7 +9,7 @@ murmur_onehot = [0,1,0]
 extrasystole_onehot = [0,0,1]
 
 def decodeFolder(category):
-	print("Starting decoding folder...")
+	print("Starting decoding folder "+category+" ...")
 	listOfFiles = os.listdir(category)
 	arrays_sound = np.empty((0,193))
 	for file in listOfFiles:
@@ -19,7 +19,7 @@ def decodeFolder(category):
 	return arrays_sound
 
 def extract_feature(file_name):
-	print("Extracting...")
+	print("Extracting "+file_name+" ...")
 	X, sample_rate = librosa.load(file_name)
 	stft = np.abs(librosa.stft(X))
 	mfccs = np.mean(librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40).T,axis=0)
@@ -29,11 +29,17 @@ def extract_feature(file_name):
 	tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X),sr=sample_rate).T,axis=0)
 	return np.hstack((mfccs,chroma,mel,contrast,tonnetz))
 
-
+#train data
 normal_sounds = decodeFolder("normal")
-labels = [normal_onehot for items in normal_sounds]
+normal_labels = [normal_onehot for items in normal_sounds]
+murmur_sounds = decodeFolder("murmur")
+murmur_labels = [murmur_onehot for items in murmur_sounds]
+train_sounds = np.concatenate((normal_sounds, murmur_sounds))
+train_labels = np.concatenate((normal_labels, murmur_labels))
 
-
+#test_data
+test_sound = decodeFolder("test")
+					
 					#####################TENSORFLOW#############################
 
 #setting up hyperparameters
@@ -52,5 +58,6 @@ train_step = tf.train.GradientDescentOptimizer(0.001).minimize(cross_entropy)
 with tf.Session() as sess:
 	sess.run(init)
 	for epoch in range(200):
-		sess.run(y,feed_dict={x:normal_sounds, y_:labels})
+		sess.run(train_step,feed_dict={x:train_sounds, y_:train_labels})
 	print("Training Done!")
+	print(sess.run(y,feed_dict={x:test_sound}))
