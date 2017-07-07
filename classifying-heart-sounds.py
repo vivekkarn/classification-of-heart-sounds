@@ -4,9 +4,8 @@ import tensorflow as tf
 import numpy as np
 
 
-normal_onehot = [1,0,0]
-murmur_onehot = [0,1,0]
-extrasystole_onehot = [0,0,1]
+normal_onehot = [1,0]
+murmur_onehot = [0,1]
 
 def decodeFolder(category):
 	print("Starting decoding folder "+category+" ...")
@@ -44,20 +43,21 @@ test_sound = decodeFolder("test")
 
 #setting up hyperparameters
 x = tf.placeholder(tf.float32,[None,193])
-y_ = tf.placeholder(tf.float32,[None,3])
-W = tf.Variable(tf.zeros([193,3]))
-b = tf.Variable(tf.zeros([3]))
+y_ = tf.placeholder(tf.float32,[None,2])
+W = tf.Variable(tf.zeros([193,2]))
+b = tf.Variable(tf.zeros([2]))
 init = tf.global_variables_initializer()
 
 #starting training process
 y = tf.nn.softmax(tf.matmul(x, W) + b)
-cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+cross_entropy = -tf.reduce_sum(y_ * tf.log(y+1e-9))
 train_step = tf.train.GradientDescentOptimizer(0.001).minimize(cross_entropy)
 
 
 with tf.Session() as sess:
 	sess.run(init)
-	for epoch in range(200):
+	for epoch in range(260):
 		sess.run(train_step,feed_dict={x:train_sounds, y_:train_labels})
 	print("Training Done!")
 	print(sess.run(y,feed_dict={x:test_sound}))
+	#print(sess.run(tf.argmax(y,0),feed_dict={x:test_sound}))
