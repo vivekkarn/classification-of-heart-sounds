@@ -1,2 +1,2 @@
 # classification-of-heart-sounds
-Trying to classify heartsounds for murmur and extrasystole using tensorflow
+Trying to classify heartsounds for murmur and extrasystole using tensorflow and sklearn
